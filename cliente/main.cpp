@@ -35,6 +35,49 @@ int leerPuertoDesdeConfig(const std::string& filename) {
     return 5000; // Valor por defecto
 }
 
+void receptor(int puerto) {
+    int rec_sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (rec_sock < 0) {
+        perror("socket receptor");
+        exit(1);
+    }
+
+    sockaddr_in my_addr{};
+    my_addr.sin_family = AF_INET;
+    my_addr.sin_port = htons(puerto);
+    my_addr.sin_addr.s_addr = INADDR_ANY; // Escuchar en todas las interfaces
+
+    if (bind(rec_sock, (struct sockaddr*)&my_addr, sizeof(my_addr)) < 0) {
+        perror("bind receptor");
+        exit(1);
+    }
+
+    if (listen(rec_sock, 5) < 0) {
+        perror("listen receptor");
+        exit(1);
+    }
+
+    std::cout << "Escuchando mensajes en el puerto " << puerto << "...\n";
+
+    while (true) {
+        sockaddr_in sender_addr{};
+        socklen_t addrlen = sizeof(sender_addr);
+        int sender_sock = accept(rec_sock, (struct sockaddr*)&sender_addr, &addrlen);
+        if (sender_sock < 0) {
+            perror("accept receptor");
+            continue;
+        }
+        char rec_buffer[1024];
+        ssize_t rec_bytes = recv(sender_sock, rec_buffer, sizeof(rec_buffer) - 1, 0);
+        if (rec_bytes > 0) {
+            rec_buffer[rec_bytes] = '\0';
+            std::cout << "\n[Mensaje recibido] " << rec_buffer << std::endl;
+        }
+        close(sender_sock);
+    }
+    close(rec_sock);
+}
+
 int main() {
     std::string nombre;
     std::cout << "Ingrese su nombre de usuario: ";
@@ -67,6 +110,18 @@ int main() {
     std::cout << "Registro enviado al servidor: " << mensaje << std::endl;
 
     close(sock);
+
+    // Crear un proceso para recibir mensajes
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return 1;
+    }
+    if (pid == 0) {
+        // Proceso hijo: receptor de mensajes
+        receptor(puerto);
+        exit(0);
+    }
 
     while (true) {
         std::string destinatario, texto;
