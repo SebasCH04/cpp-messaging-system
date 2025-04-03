@@ -4,6 +4,8 @@
 #include <cstring>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h> 
 
 struct Usuario {
     std::string ip;
@@ -53,17 +55,50 @@ int main() {
             buffer[bytes_read] = '\0';
             std::string mensaje(buffer);
 
-            // Parsear el mensaje: nombre|ip|puerto
             size_t pos1 = mensaje.find('|');
             size_t pos2 = mensaje.find('|', pos1 + 1);
-            if (pos1 != std::string::npos && pos2 != std::string::npos) {
+
+            // Registro de usuario: nombre|ip|puerto
+            if (pos1 != std::string::npos && pos2 != std::string::npos && mensaje.find(':') == std::string::npos) {
                 std::string nombre = mensaje.substr(0, pos1);
                 std::string ip = mensaje.substr(pos1 + 1, pos2 - pos1 - 1);
                 int puerto = std::stoi(mensaje.substr(pos2 + 1));
 
                 usuarios[nombre] = Usuario{ip, puerto};
                 std::cout << "Usuario registrado: " << nombre << " (" << ip << ":" << puerto << ")" << std::endl;
+
+            // Envío de mensaje: destinatario|remitente: mensaje
+            } else if (pos1 != std::string::npos) {
+                std::string destinatario = mensaje.substr(0, pos1);
+                std::string contenido = mensaje.substr(pos1 + 1);
+
+                if (usuarios.find(destinatario) != usuarios.end()) {
+                    Usuario& destino = usuarios[destinatario];
+
+                    int dest_sock = socket(AF_INET, SOCK_STREAM, 0);
+                    if (dest_sock < 0) {
+                        perror("socket destinatario");
+                        continue;
+                    }
+
+                    sockaddr_in dest_addr{};
+                    dest_addr.sin_family = AF_INET;
+                    dest_addr.sin_port = htons(destino.puerto);
+                    inet_pton(AF_INET, destino.ip.c_str(), &dest_addr.sin_addr);
+
+                    if (connect(dest_sock, (sockaddr*)&dest_addr, sizeof(dest_addr)) == 0) {
+                        send(dest_sock, contenido.c_str(), contenido.size(), 0);
+                        std::cout << "Mensaje enviado a " << destinatario << ": " << contenido << std::endl;
+                    } else {
+                        std::cerr << "No se pudo conectar con el destinatario " << destinatario << std::endl;
+                    }
+
+                    close(dest_sock);
+                } else {
+                    std::cerr << "Destinatario '" << destinatario << "' no encontrado en la tabla de usuarios.\n";
+                }
             }
+
         }
 
         close(client_socket);
