@@ -24,15 +24,37 @@ std::string obtenerIP() {
     return inet_ntoa(*addr_list[0]);
 }
 
+// Función para quitar espacios al inicio y final de una cadena.
+std::string trim(const std::string &s) {
+    size_t start = s.find_first_not_of(" \t\r\n");
+    if (start == std::string::npos)
+        return "";
+    size_t end = s.find_last_not_of(" \t\r\n");
+    return s.substr(start, end - start + 1);
+}
+
 int leerPuertoDesdeConfig(const std::string& filename) {
     std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Error: No se pudo abrir el archivo de configuracion: " << filename << std::endl;
+        return 5000; // Valor por defecto si no se pudo abrir el archivo
+    }
+
     std::string line;
     while (std::getline(file, line)) {
+        line = trim(line); // Eliminamos espacios innecesarios
+        // Verificamos que la línea comience exactamente con "PUERTO="
         if (line.rfind("PUERTO=", 0) == 0) {
-            return std::stoi(line.substr(7));
+            try {
+                // Convertimos la parte numérica a entero
+                return std::stoi(line.substr(7));
+            } catch (const std::exception& e) {
+                std::cerr << "Error al convertir el puerto: " << e.what() << std::endl;
+                return 5000; // Retornamos el valor por defecto en caso de error
+            }
         }
     }
-    return 5000;
+    return 5000; // Valor por defecto si no se encontró la línea
 }
 
 void receptor(int puerto) {
@@ -83,7 +105,7 @@ int main() {
     std::cout << "Ingrese su nombre de usuario: ";
     std::getline(std::cin, nombre);
 
-    int puerto = leerPuertoDesdeConfig("cliente/config.txt");
+    int puerto = leerPuertoDesdeConfig("cliente2/config.txt");
     std::string ip = obtenerIP();
 
     std::string mensaje = nombre + "|" + ip + "|" + std::to_string(puerto);
