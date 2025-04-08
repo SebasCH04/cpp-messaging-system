@@ -1,4 +1,3 @@
-# Bienvenido
+# cpp-messaging-system
 
-Para ver la documentación completa, visita [Documentacion.md](Documentacion.md).
-
+Para ver la documentación del proyecto, [Documentacion.md](Documentacion.md).
