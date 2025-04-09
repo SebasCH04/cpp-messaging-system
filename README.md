@@ -1,3 +1,3 @@
 # Sistema de Mensajería utilizando Programación Imperativa (C++):
 
-Para ver la documentación del proyecto, [Documentacion](Documentacion/Documentacion.pdf).
+![Documentación](https://github.com/SebasCH04/cpp-messaging-system/blob/main/Documentacion/Documentacion.pdf)
