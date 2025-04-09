@@ -21,8 +21,8 @@ int main() {
 
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY; // Escucha en todas las interfaces
-    server_addr.sin_port = htons(9000); // Puerto fijo del servidor
+    server_addr.sin_addr.s_addr = INADDR_ANY; //escucha en todas las interfaces
+    server_addr.sin_port = htons(9000); //puerto fijo del servidor
 
     if (bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
         perror("bind");
@@ -58,7 +58,7 @@ int main() {
             size_t pos1 = mensaje.find('|');
             size_t pos2 = mensaje.find('|', pos1 + 1);
 
-            // Registro de usuario: nombre|ip|puerto
+            //registro de usuario: nombre|ip|puerto
             if (pos1 != std::string::npos && pos2 != std::string::npos && mensaje.find(':') == std::string::npos) {
                 std::string nombre = mensaje.substr(0, pos1);
                 std::string ip = mensaje.substr(pos1 + 1, pos2 - pos1 - 1);
@@ -67,7 +67,7 @@ int main() {
                 usuarios[nombre] = Usuario{ip, puerto};
                 std::cout << "Usuario registrado: " << nombre << " (" << ip << ":" << puerto << ")" << std::endl;
 
-            // Envío de mensaje: destinatario|remitente: mensaje
+            //envio de mensaje: destinatario|remitente: mensaje
             } else if (pos1 != std::string::npos) {
                 std::string destinatario = mensaje.substr(0, pos1);
                 std::string contenido = mensaje.substr(pos1 + 1);
@@ -98,12 +98,9 @@ int main() {
                     std::cerr << "Destinatario '" << destinatario << "' no encontrado en la tabla de usuarios.\n";
                 }
             }
-
         }
-
         close(client_socket);
     }
-
     close(server_fd);
     return 0;
 }
