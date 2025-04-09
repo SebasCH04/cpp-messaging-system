@@ -14,6 +14,8 @@ Profesor:
 
 Este proyecto implementa un sistema de mensajería bastante simple utilizando el paradigma imperativo en C++, con comunicación basada en sockets TCP entre un servidor y múltiples clientes.
 
+Enlace al repositorio de GitHub: https://github.com/SebasCH04/cpp-messaging-system/tree/main
+
 ---
 
 ## Pasos de instalación del programa
