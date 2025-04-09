@@ -91,7 +91,7 @@ int main() {
     std::getline(std::cin, nombre);
 
     //leer el puerto desde el archivo de configuracion 
-    int puerto = leerPuertoDesdeConfig("cliente/config.txt");
+    int puerto = leerPuertoDesdeConfig("cliente3/config.txt");
     std::string ip = obtenerIP();
 
     //conformar el mensaje de registro y enviarlo al servidor
